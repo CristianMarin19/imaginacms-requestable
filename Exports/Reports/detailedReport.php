@@ -21,7 +21,7 @@ class detailedReport
   public function getQuery()
   {
     $query = Requestable::query()
-      ->without("fields")
+      ->without("fields","files")
       ->selectRaw('
         requestable__requestables.id AS requestable_id,
         category.title AS category,
@@ -39,7 +39,7 @@ class detailedReport
       }, 'last_comment')
       ->leftJoin('requestable__category_translations as category', 'requestable__requestables.category_id', '=', 'category.category_id')
       ->leftJoin('requestable__status_translations as status_t', 'requestable__requestables.status_id', '=', 'status_t.status_id')
-      ->leftJoin('users as user_requested_by_requestable', 'requestable__requestables.requested_by', '=', 'user_requested_by_requestable.id')
+      ->leftJoin('users as user_requested_by_requestable', 'requestable__requestables.requested_by_id', '=', 'user_requested_by_requestable.id')
       ->leftJoin('users as user_requestable', 'requestable__requestables.created_by', '=', 'user_requestable.id')
       ->where('requestable__requestables.category_id', $this->params->filter->categoryId)
       ->orderByDesc('requestable__requestables.id')
