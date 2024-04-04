@@ -21,7 +21,7 @@ class statusesReport
   public function getQuery()
   {
     $query = Requestable::query()
-      ->without("fields")
+      ->without("fields","files")
       ->selectRaw("
         COALESCE(prev_status_t.title, '----') AS previous_status,
         COALESCE(current_status_t.title, no_history_status_t.title, '----') AS current_status,
@@ -50,7 +50,7 @@ class statusesReport
       ->leftJoin('requestable__status_translations as no_history_status_t', 'requestable__requestables.status_id', '=', 'no_history_status_t.status_id')
       ->leftJoin('users as user_status_history', 'current.created_by', '=', 'user_status_history.id')
       ->leftJoin('users as user_requestable', 'requestable__requestables.created_by', '=', 'user_requestable.id')
-      ->leftJoin('users as user_requested_by_requestable', 'requestable__requestables.requested_by', '=', 'user_requested_by_requestable.id')
+      ->leftJoin('users as user_requested_by_requestable', 'requestable__requestables.requested_by_id', '=', 'user_requested_by_requestable.id')
       ->where('requestable__requestables.category_id', $this->params->filter->categoryId)
       ->orderByDesc('requestable__requestables.id')
       ->orderByDesc('current.created_at');

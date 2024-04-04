@@ -56,8 +56,12 @@ class RequestablesExport implements ShouldQueue,
       //Get request category by filter
       $params = ['include' => ['forms.fields']];
       $category = $categoryRepository->getItem($this->params->filter->categoryId, json_decode(json_encode($params)));
+
+      //Validation 
+      $catForm = $category->forms->first();
+
       //Get and instance the category fields
-      $this->categoryFields = $category->form->fields->map->only('name', 'label', 'type');
+      $this->categoryFields = $catForm->fields->map->only('name', 'label', 'type');
     }
   }
 
