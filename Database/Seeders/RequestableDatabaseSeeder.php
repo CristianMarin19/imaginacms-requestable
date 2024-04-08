@@ -8,15 +8,16 @@ use Modules\Isite\Jobs\ProcessSeeds;
 
 class RequestableDatabaseSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run()
-    {
-        Model::unguard();
-        ProcessSeeds::dispatch([
-            'baseClass' => "\Modules\Requestable\Database\Seeders",
-            'seeds' => ['RequestableTableSeeder', 'CreateFormTableSeeder', 'CreateCategoriesRulesTableSeeder'],
-        ]);
-    }
+  /**
+   * Run the database seeds.
+   */
+  public function run()
+  {
+    Model::unguard();
+    ProcessSeeds::dispatch([
+      'baseClass' => "\Modules\Requestable\Database\Seeders",
+      "seeds" => ["RequestableTableSeeder", "CreateFormTableSeeder", "UpdateSystemNameCategoryRuleTableSeeder", "CreateCategoriesRulesTableSeeder",
+        "UpdateTypeCommentsTableSeeder", "UpdateSystemTypeFormsCategoriesTableSeeder"]
+    ]);
+  }
 }
