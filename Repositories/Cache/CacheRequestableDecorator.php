@@ -76,15 +76,11 @@ class CacheRequestableDecorator extends BaseCacheDecorator implements Requestabl
 
   public function moduleConfigs()
   {
-    $this->clearCache();
-
     return $this->repository->moduleConfigs();
   }
 
   public function leadsByStatus($params = false)
   {
-    $this->clearCache();
-
     return $this->repository->leadsByStatus($params);
   }
 }
