@@ -73,4 +73,18 @@ class CacheRequestableDecorator extends BaseCacheDecorator implements Requestabl
     
     return $this->repository->deleteBy($criteria, $params);
   }
+
+  public function moduleConfigs()
+  {
+    $this->clearCache();
+
+    return $this->repository->moduleConfigs();
+  }
+
+  public function leadsByStatus($params = false)
+  {
+    $this->clearCache();
+
+    return $this->repository->leadsByStatus($params);
+  }
 }
