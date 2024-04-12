@@ -6,82 +6,100 @@ use Modules\Core\Icrud\Entities\CrudModel;
 use Modules\Ifillable\Traits\isFillable;
 
 //Static Classes
+use Modules\Requestable\Entities\StatusGeneral;
 
 class AutomationRule extends CrudModel
 {
-    use isFillable;
 
-    protected $table = 'requestable__automation_rules';
+  use isFillable;
 
-    public $transformer = 'Modules\Requestable\Transformers\AutomationRuleTransformer';
+  protected $table = 'requestable__automation_rules';
+  public $transformer = 'Modules\Requestable\Transformers\AutomationRuleTransformer';
+  public $repository = 'Modules\Requestable\Repositories\AutomationRuleRepository';
+  public $requestValidation = [
+    'create' => 'Modules\Requestable\Http\Requests\CreateAutomationRuleRequest',
+    'update' => 'Modules\Requestable\Http\Requests\UpdateAutomationRuleRequest',
+  ];
+  //Instance external/internal events to dispatch with extraData
+  public $dispatchesEventsWithBindings = [
+    //eg. ['path' => 'path/module/event', 'extraData' => [/*...optional*/]]
+    'created' => [],
+    'creating' => [],
+    'updated' => [],
+    'updating' => [],
+    'deleting' => [],
+    'deleted' => []
+  ];
 
-    public $repository = 'Modules\Requestable\Repositories\AutomationRuleRepository';
+  protected $fillable = [
+    'name',
+    'run_type',
+    'run_config',
+    'working_hours',
+    'status_id',
+    'category_rule_id',
+    'to',
+    'status'
+  ];
 
-    public $requestValidation = [
-        'create' => 'Modules\Requestable\Http\Requests\CreateAutomationRuleRequest',
-        'update' => 'Modules\Requestable\Http\Requests\UpdateAutomationRuleRequest',
-    ];
+  protected $with = [
+    "fields"
+  ];
 
-    //Instance external/internal events to dispatch with extraData
-    public $dispatchesEventsWithBindings = [
-        //eg. ['path' => 'path/module/event', 'extraData' => [/*...optional*/]]
-        'created' => [],
-        'creating' => [],
-        'updated' => [],
-        'updating' => [],
-        'deleting' => [],
-        'deleted' => [],
-    ];
+  protected $casts = [
+    'run_config' => 'array',
+    'to' => 'array'
+  ];
 
-    protected $fillable = [
-        'name',
-        'run_type',
-        'run_config',
-        'working_hours',
-        'status_id',
-        'category_rule_id',
-        'to',
-        'status',
-    ];
 
-    protected $with = [
-        'fields',
-    ];
+  //============== RELATIONS ==============//
 
-    protected $casts = [
-        'run_config' => 'array',
-    ];
+  public function requestStatus()
+  {
+    return $this->belongsTo(Status::class, 'status_id');
+  }
 
-    //============== RELATIONS ==============//
+  public function categoryRule()
+  {
+    return $this->belongsTo(CategoryRule::class);
+  }
 
-    public function requestStatus()
-    {
-        return $this->belongsTo(Status::class, 'status_id');
-    }
+  public function getStatusNameAttribute()
+  {
+    $status = new StatusGeneral();
+    return $status->get($this->status);
+  }
 
-    public function categoryRule()
-    {
-        return $this->belongsTo(CategoryRule::class);
-    }
+  //==================== ACCESORS ==============//
 
-    public function getStatusNameAttribute()
-    {
-        $status = new StatusGeneral();
+  public function getRunConfigAttribute($value)
+  {
+    return json_decode($value);
+  }
 
-        return $status->get($this->status);
-    }
+  public function getToAttribute($value)
+  {
+    $to = json_decode($value);
 
-    //==================== ACCESORS ==============//
+    //Validation to old case - data saved as string
+    if(is_null($to))
+      $to[] = $value;
 
-    public function getRunConfigAttribute($value)
-    {
-        return json_decode($value);
-    }
+    return $to;
+  }
 
-    //==================== MUTATORS ==============//
 
-    public function setRunConfigAttribute($value)
-    {
-        $this->attributes['run_config'] = json_encode($value);
-    }
+  //==================== MUTATORS ==============//
+
+  public function setRunConfigAttribute($value)
+  {
+    $this->attributes['run_config'] = json_encode($value);
+  }
+
+  public function setToAttribute($value)
+  {
+    $this->attributes['to'] = json_encode($value);
+  }
+
+
 }

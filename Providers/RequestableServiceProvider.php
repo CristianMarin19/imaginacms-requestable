@@ -34,18 +34,22 @@ class RequestableServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot()
-    {
-        $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'permissions'), 'asgard.requestable.permissions');
-        $this->publishConfig('requestable', 'config');
-        $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'settings'), 'asgard.requestable.settings');
-        $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'settings-fields'), 'asgard.requestable.settings-fields');
-        //$this->publishConfig('requestable', 'requests');
-        $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'cmsPages'), 'asgard.requestable.cmsPages');
-        $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'cmsSidebar'), 'asgard.requestable.cmsSidebar');
+  public function boot(DispatcherContract $events)
+  {
 
-        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
-    }
+    $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'permissions'), "asgard.requestable.permissions");
+    $this->publishConfig('requestable', 'config');
+    $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'settings'), "asgard.requestable.settings");
+    $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'settings-fields'), "asgard.requestable.settings-fields");
+    //$this->publishConfig('requestable', 'requests');
+    $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'cmsPages'), "asgard.requestable.cmsPages");
+    $this->mergeConfigFrom($this->getModuleConfigFilePath('requestable', 'cmsSidebar'), "asgard.requestable.cmsSidebar");
+
+    $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
+    $events->listen(RequestableIsUpdating::class, NotifyNewFilesRequestable::class);
+  //  $events->listen(PostWasUpdated::class, NotifyNewFilesRequestable::class);
+  }
 
     /**
      * Get the services provided by the provider.
@@ -138,7 +142,19 @@ class RequestableServiceProvider extends ServiceProvider
                     return $repository;
                 }
 
-                return new \Modules\Requestable\Repositories\Cache\CacheAutomationRuleDecorator($repository);
+        return new \Modules\Requestable\Repositories\Cache\CacheAutomationRuleDecorator($repository);
+      }
+    );
+        $this->app->bind(
+            'Modules\Requestable\Repositories\SourceRepository',
+            function () {
+                $repository = new \Modules\Requestable\Repositories\Eloquent\EloquentSourceRepository(new \Modules\Requestable\Entities\Source());
+
+                if (! config('app.cache')) {
+                    return $repository;
+                }
+
+                return new \Modules\Requestable\Repositories\Cache\CacheSourceDecorator($repository);
             }
         );
         // add bindings

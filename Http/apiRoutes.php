@@ -64,24 +64,56 @@ Route::prefix('/requestable/v1')->group(function (Router $router) {
         ],
     ]);
 
-    /**
-     * Requestable with Icomments Module
-     */
-    if (is_module_enabled('Icomments')) {
-        $router->apiCrud([
-            'module' => 'requestable',
-            'prefix' => 'comments',
-            'controller' => '\Modules\Icomments\Http\Controllers\Api\CommentApiController',
-            'middleware' => [
-                'create' => ['auth:api', 'auth-can:requestable.comments.create'],
-                'update' => ['auth:api', 'auth-can:requestable.comments.edit'],
-                'delete' => ['auth:api', 'auth-can:requestable.comments.destroy'],
-            ],
-        ]);
-    }
+  /**
+   * Requestable with Icomments Module
+   */
+  if (is_module_enabled('Icomments')) {
+    $router->apiCrud([
+      'module' => 'requestable',
+      'prefix' => 'comments',
+      'controller' => '\Modules\Icomments\Http\Controllers\Api\CommentApiController',
+      'middleware' => [
+        'create' => ['auth:api', 'auth-can:requestable.comments.create'],
+        'update' => ['auth:api', 'auth-can:requestable.comments.edit'],
+        'delete' => ['auth:api', 'auth-can:requestable.comments.destroy']
+      ]
+    ]);
+  }
 
-    //======  REQUESTS
-    require 'ApiRoutes/requestablesRoutes.php';
+  $router->apiCrud([
+    'module' => 'requestable',
+    'prefix' => 'status-types',
+    'staticEntity' => 'Modules\Requestable\Entities\StatusType'
+  ]);
+
+  $router->apiCrud([
+    'module' => 'requestable',
+    'prefix' => 'sources',
+    'controller' => 'SourceApiController',
+    'middleware' => [
+      'create' => ['auth:api', 'auth-can:requestable.sources.create'],
+      'update' => ['auth:api', 'auth-can:requestable.sources.edit'],
+      'delete' => ['auth:api', 'auth-can:requestable.sources.destroy']
+    ]
+  ]);
+// append
+
+
+  $router->get('requestable/analytics/{criteria}', [
+    'module' => 'requestable',
+    'uses' => 'RequestableApiController@analytics',
+    'middleware' => ['auth:api']
+  ]);
+
+  $router->post('requestable/{criteria}/chat', [
+    'module' => 'requestable',
+    'uses' => 'RequestableApiController@createConversation',
+    'middleware' => ['auth:api']
+  ]);
+
+
+  //======  REQUESTS
+  require 'ApiRoutes/requestablesRoutes.php';
 
     require 'ApiRoutes/statusesRoutes.php';
 

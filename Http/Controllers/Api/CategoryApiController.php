@@ -2,12 +2,14 @@
 
 namespace Modules\Requestable\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-//Model
 use Modules\Core\Icrud\Controllers\BaseCrudController;
-use Modules\Iforms\Repositories\FieldRepository;
+//Model
 use Modules\Requestable\Entities\Category;
 use Modules\Requestable\Repositories\CategoryRepository;
+use Modules\Iforms\Repositories\FieldRepository;
+
+use Illuminate\Http\Request;
+
 // Transformers
 use Modules\Requestable\Transformers\FormFieldTransformer;
 
@@ -41,16 +43,16 @@ class CategoryApiController extends BaseCrudController
             //Get Parameters from URL.
             $params = $this->getParamsRequest($request);
 
-            // Search
-            $model = $this->modelRepository->getItem($criteria);
+      // Search Category Repository
+      $model = $this->modelRepository->getItem($criteria);
 
             //Break if no found item
             if (! $model) {
                 throw new \Exception('Item not found', 404);
             }
 
-            // Get form from Model
-            $form = $model->form;
+      // Get form from Model
+      $form = $model->form->first();
 
             if (! is_null($form->id)) {
                 $params->filter->formId = $form->id;

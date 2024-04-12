@@ -4,7 +4,7 @@ namespace Modules\Requestable\Transformers;
 
 use Modules\Core\Icrud\Transformers\CrudResource;
 
-class StatusTransformer extends CrudResource
+class SourceTransformer extends CrudResource
 {
   /**
   * Method to merge values with response
@@ -14,7 +14,7 @@ class StatusTransformer extends CrudResource
   public function modelAttributes($request)
   {
     return [
-      'typeName' => $this->typeName
+      
     ];
   }
 }

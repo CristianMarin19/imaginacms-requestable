@@ -1,17 +1,15 @@
 <?php
 
 namespace Modules\Requestable\Http\Requests;
-use Modules\Requestable\Rules\ValidateType;
 
 use Modules\Core\Internationalisation\BaseFormRequest;
 
-class UpdateStatusRequest extends BaseFormRequest
+class CreateSourceRequest extends BaseFormRequest
 {
     public function rules()
     {
         return [
-            'category_id' => "required",
-            'type' => ['sometimes', new ValidateType]
+            'title' => 'required',
         ];
     }
 
@@ -27,7 +25,9 @@ class UpdateStatusRequest extends BaseFormRequest
 
     public function messages()
     {
-        return [];
+        return [
+            'title.required' => trans('requestable::common.messages.field required'),
+        ];
     }
 
     public function translationMessages()
@@ -38,5 +38,5 @@ class UpdateStatusRequest extends BaseFormRequest
     public function getValidator(){
         return $this->getValidatorInstance();
     }
-
+    
 }

@@ -9,32 +9,28 @@ class Status extends CrudModel
 {
     use Translatable;
 
-    protected $table = 'requestable__statuses';
-
-    public $transformer = 'Modules\Requestable\Transformers\StatusTransformer';
-
-    public $repository = 'Modules\Requestable\Repositories\StatusRepository';
-
-    public $requestValidation = [
-        'create' => 'Modules\Requestable\Http\Requests\CreateStatusRequest',
-        'update' => 'Modules\Requestable\Http\Requests\UpdateStatusRequest',
-    ];
-
-    public $translatedAttributes = [
-        'title',
-    ];
-
-    protected $fillable = [
-        'value',
-        'category_id',
-        'events',
-        'color',
-        'position',
-        'final',
-        'default',
-        'cancelled_elapsed_time',
-        'delete_request',
-    ];
+  protected $table = 'requestable__statuses';
+  public $transformer = 'Modules\Requestable\Transformers\StatusTransformer';
+  public $repository = 'Modules\Requestable\Repositories\StatusRepository';
+  public $requestValidation = [
+    'create' => 'Modules\Requestable\Http\Requests\CreateStatusRequest',
+    'update' => 'Modules\Requestable\Http\Requests\UpdateStatusRequest',
+  ];
+  public $translatedAttributes = [
+    'title'
+  ];
+  protected $fillable = [
+    'value',
+    'category_id',
+    'events',
+    'color',
+    'position',
+    'final',
+    'default',
+    'cancelled_elapsed_time',
+    'delete_request',
+    'type'
+  ];
 
     protected $fakeColumns = ['events'];
 
@@ -69,8 +65,15 @@ class Status extends CrudModel
         return $this->hasMany(Requestable::class);
     }
 
-    public function automationRules()
-    {
-        return $this->hasMany(AutomationRule::class);
-    }
+  public function automationRules()
+  {
+    return $this->hasMany(AutomationRule::class);
+  }
+
+  public function getTypeNameAttribute()
+  {
+    $type = new StatusType();
+    return $type->get($this->type);
+  }
+
 }

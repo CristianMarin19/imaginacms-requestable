@@ -15,7 +15,9 @@ class CreateCategoryRequest extends BaseFormRequest
 
     public function translationRules()
     {
-        return [];
+        return [
+          'title' => 'required|min:2',
+        ];
     }
 
     public function authorize()
@@ -33,7 +35,11 @@ class CreateCategoryRequest extends BaseFormRequest
 
     public function translationMessages()
     {
-        return [];
+        return [
+          // title
+          'title.required' => trans('icommerce::common.messages.field required'),
+          'title.min:2' => trans('icommerce::common.messages.min 2 characters'),
+        ];
     }
 
     public function getValidator()

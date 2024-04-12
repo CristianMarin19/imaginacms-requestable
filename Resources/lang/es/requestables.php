@@ -25,13 +25,19 @@ return [
         'date' => 'Fecha y Hora',
         'hour' => 'Hora del cambio',
         'id' => 'Petición ID',
-        'history created by' => 'Cambio realizado por',
+        'history created by' => 'Cambio realizado por'
     ],
     'form' => [
     ],
     'messages' => [
-        'creatingSameRequestError' => 'Ya hay una solicitud en proceso, para realizar otra solicitud debe esperar a que culmine la solicitud actual',
+      "creatingSameRequestError" => "Ya hay una solicitud en proceso, para realizar otra solicitud debe esperar a que culmine la solicitud actual"
     ],
-    'validation' => [
+    'validations' => [
+      'chatRequestableIdRequired' => "El id del lead no es válido",
+      'chatRequestedByIdRequired' => "El lead no tiene un contacto asignado",
+      'chatRequestedByPhoneNumberRequired' => "El contacto asignado no tiene un número de teléfono válido",
     ],
+    'responsible' => [
+        'updated' => "Se ha actualizado el responsable a: :responsible"
+    ]
 ];
