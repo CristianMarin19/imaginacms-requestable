@@ -3,16 +3,26 @@
 namespace Modules\Requestable\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Modules\Core\Icrud\Controllers\BaseCrudController;
+use Mockery\CountValidator\Exception;
+use Illuminate\Contracts\Foundation\Application;
+use Modules\Ichat\Transformers\ConversationTransformer;
+use Modules\Ihelpers\Http\Controllers\Api\BaseApiController;
 use Modules\Requestable\Entities\Requestable;
-use Modules\Requestable\Events\RequestableWasCreated;
-use Modules\Requestable\Events\RequestableWasUpdated;
 use Modules\Requestable\Http\Requests\CreateRequestableRequest;
 use Modules\Requestable\Http\Requests\UpdateRequestableRequest;
+use Modules\Requestable\Repositories\CategoryRepository;
+use Modules\Requestable\Repositories\FieldRepository;
 use Modules\Requestable\Repositories\RequestableRepository;
-// Events
 use Modules\Requestable\Services\RequestableService;
 use Modules\Requestable\Transformers\RequestableTransformer;
+use Modules\Core\Icrud\Controllers\BaseCrudController;
+use phpDocumentor\Reflection\DocBlock\Tags\Throws;
+use ReflectionClass;
+
+// Events
+use Modules\Requestable\Events\RequestableWasCreated;
+use Modules\Requestable\Events\RequestableWasUpdated;
+use Modules\Requestable\Events\RequestableIsUpdating;
 
 class RequestableApiController extends BaseCrudController
 {
@@ -52,12 +62,12 @@ class RequestableApiController extends BaseCrudController
                 'data' => RequestableTransformer::collection($newRequest),
             ];
 
-            //If request pagination add meta-page
-            $params->page ? $response['meta'] = ['page' => $this->pageTransformer($newRequest)] : false;
-        } catch (\Exception $e) {
-            $status = $this->getStatusError($e->getCode());
-            $response = ['errors' => $e->getMessage()];
-        }
+      //If request pagination add meta-page
+      $params->page ? $response["meta"] = ["page" => $this->pageTransformer($newRequest)] : false;
+    } catch (\Exception $e) {
+      $status = $this->getStatusError($e->getCode());
+      $response = ["messages" => [["message" => $e->getMessage(), "type" => "error"]]];
+    }
 
         //Return response
         return response()->json($response, $status ?? 200);
@@ -82,12 +92,12 @@ class RequestableApiController extends BaseCrudController
                 'data' => config('asgard.requestable.config.requests'),
             ];
 
-            //If request pagination add meta-page
-            //$params->page ? $response["meta"] = ["page" => $this->pageTransformer($newRequest)] : false;
-        } catch (\Exception $e) {
-            $status = $this->getStatusError($e->getCode());
-            $response = ['errors' => $e->getMessage()];
-        }
+      //If request pagination add meta-page
+      //$params->page ? $response["meta"] = ["page" => $this->pageTransformer($newRequest)] : false;
+    } catch (\Exception $e) {
+      $status = $this->getStatusError($e->getCode());
+      $response = ["messages" => [["message" => $e->getMessage(), "type" => "error"]]];
+    }
 
         //Return response
         return response()->json($response, $status ?? 200);
@@ -112,12 +122,13 @@ class RequestableApiController extends BaseCrudController
                 throw new \Exception('Item not found', 404);
             }
 
-            //Response
-            $response = ['data' => new RequestableTransformer($newRequest)];
-        } catch (\Exception $e) {
-            $status = $this->getStatusError($e->getCode());
-            $response = ['errors' => $e->getMessage()];
-        }
+      //Response
+      $response = ["data" => new RequestableTransformer($newRequest)];
+
+    } catch (\Exception $e) {
+      $status = $this->getStatusError($e->getCode());
+      $response = ["messages" => [["message" => $e->getMessage(), "type" => "error"]]];
+    }
 
         //Return response
         return response()->json($response, $status ?? 200);
@@ -151,15 +162,16 @@ class RequestableApiController extends BaseCrudController
             //Response
             $response = ['data' => new RequestableTransformer($model)];
 
-            \DB::commit(); //Commit to Data Base
-        } catch (\Exception $e) {
-            \DB::rollback(); //Rollback to Data Base
-            $status = $this->getStatusError($e->getCode());
-            $response = ['errors' => $e->getMessage()];
-        }
-        //Return response
-        return response()->json($response, $status ?? 200);
+      \DB::commit(); //Commit to Data Base
+    } catch (\Exception $e) {
+      \DB::rollback();//Rollback to Data Base
+      $status = $this->getStatusError($e->getCode());
+      $response = ["messages" => [["message" => $e->getMessage(), "type" => "error"]]];
+
     }
+    //Return response
+    return response()->json($response, $status ?? 200);
+  }
 
     /**
      * UPDATE ITEM
@@ -176,8 +188,13 @@ class RequestableApiController extends BaseCrudController
             //Get data
             $data = $request->input('attributes');
 
-            //Validate Request
-            $this->validateRequestApi(new UpdateRequestableRequest((array) $data));
+      $requestableRepository = app('Modules\Requestable\Repositories\RequestableRepository');
+      $requestableInDB = $requestableRepository->getItem($criteria);
+
+      event(new RequestableIsUpdating($data, $requestableInDB));
+
+      //Validate Request
+      $this->validateRequestApi(new UpdateRequestableRequest((array)$data));
 
             //Validate with Permission
             $data = $this->service->validateCreatedBy($data, $params);
@@ -192,10 +209,11 @@ class RequestableApiController extends BaseCrudController
             \DB::commit(); //Commit to DataBase
         } catch (\Exception $e) {
       //dd($e);
-            \DB::rollback(); //Rollback to Data Base
-            $status = $this->getStatusError($e->getCode());
-            $response = ['errors' => $e->getMessage()];
-        }
+      \DB::rollback();//Rollback to Data Base
+      $status = $this->getStatusError($e->getCode());
+      $response = ["messages" => [["message" => $e->getMessage(), "type" => "error"]]];
+
+    }
 
         //Return response
         return response()->json($response ?? ['data' => 'Item Updated'], $status ?? 200);
@@ -230,18 +248,95 @@ class RequestableApiController extends BaseCrudController
             //Create comment
             $comment = app('Modules\Icomments\Services\CommentService')->create($model, $data);
 
-            //Response
-            $response = ['data' => new \Modules\Icomments\Transformers\CommentTransformer($comment)];
+      //Response
+      $response = ["data" => new \Modules\Icomments\Transformers\CommentTransformer($comment)];
 
-            \DB::commit(); //Commit to DataBase
-        } catch (\Exception $e) {
+      \DB::commit();//Commit to DataBase
+    } catch (\Exception $e) {
       //dd($e);
-            \DB::rollback(); //Rollback to Data Base
-            $status = $this->getStatusError($e->getCode());
-            $response = ['errors' => $e->getMessage()];
-        }
+      \DB::rollback();//Rollback to Data Base
+      $status = $this->getStatusError($e->getCode());
+      $response = ["messages" => [["message" => $e->getMessage(), "type" => "error"]]];
 
-        //Return response
-        return response()->json($response ?? ['data' => 'Comment Added'], $status ?? 200);
     }
+
+    //Return response
+    return response()->json($response ?? ["data" => "Comment Added"], $status ?? 200);
+  }
+
+  public function analytics($criteria, Request $request)
+  {
+    \DB::beginTransaction(); //DB Transaction
+    try {
+      $params = $this->getParamsRequest($request);
+      $requestableRepository = app('Modules\Requestable\Repositories\RequestableRepository');
+      $functionsInRepo = new ReflectionClass('Modules\Requestable\Repositories\RequestableRepository');
+      $existFunction = $functionsInRepo->hasMethod($criteria);
+      if ($existFunction) {
+        $data = $requestableRepository->{$criteria}($params);
+      } else {
+        $data = ["errors" => trans('Requestable::common.erros.nonExistentFunction')];
+        $status = 404;
+      }
+      \DB::commit();//Commit to DataBase
+    } catch (\Exception $e) {
+      //dd($e);
+      \DB::rollback();//Rollback to Data Base
+      $status = $this->getStatusError($e->getCode());
+      $response = ["messages" => [["message" => $e->getMessage(), "type" => "error"]]];
+
+    }
+    //Return response
+    return response()->json($data, $status ?? 200);
+  }
+
+  public function createConversation($criteria, Request $request){
+
+    \DB::beginTransaction(); //DB Transaction
+    try {
+      $params = $this->getParamsRequest($request);
+
+      $requestable = $this->requestable->getItem($criteria);
+
+      if(!isset($requestable->id)){
+        throw new \Exception(trans("requestable::requestables.validations.chatRequestableIdRequired"),409);
+      }
+      $requestedBy = $requestable->requestedBy;
+
+      if(!isset($requestedBy->id)){
+        throw new \Exception(trans("requestable::requestables.validations.chatRequestedByIdRequired"),409);
+      }
+
+      if(empty($requestedBy->phone)){
+        throw new \Exception(trans("requestable::requestables.validations.chatRequestedByPhoneNumberRequired"),409);
+      }
+
+      if(isset($requestable->conversation->id)){
+        $conversation = $requestable->conversation;
+      }else{
+        $conversation = $requestable->createConversation([
+          'private' => false,
+          'provider_type' => 'whatsapp',
+          'provider_id' => $requestedBy->phone,
+          'entity_id' => $requestable->id,
+          'entity_type' => get_class($requestable),
+          'users' => [$requestedBy->id]
+        ]);
+      }
+
+      //Response
+      $response = ["data" => new ConversationTransformer($conversation)];
+
+      \DB::commit();//Commit to DataBase
+    } catch (\Exception $e) {
+      //dd($e);
+      \DB::rollback();//Rollback to Data Base
+      $status = $this->getStatusError($e->getCode());
+      $response = ["messages" => [["message" => $e->getMessage(), "type" => "error"]]];
+
+    }
+    //Return response
+    return response()->json($response, $status ?? 200);
+
+  }
 }

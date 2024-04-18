@@ -14,23 +14,24 @@ return [
         'field unique' => 'The field value :field is already in use',
     ],
 
-    'statusGeneral' => [
-        'inactive' => 'Inactive',
-        'active' => 'Active',
-    ],
-    'formFields' => [
-        'from' => 'De',
-        'subject' => 'Subject',
-        'message' => 'Mensaje',
-        'phone' => 'Teléfono',
-    ],
-    'notifications' => [
-        'comment' => ' Notification Type: :type -- Message: :message',
-        'title sent' => 'Sent Notification',
-        'type' => 'Type',
-        'from' => 'From',
-        'to' => 'To',
-        'message' => 'Message',
-    ],
+  'statusGeneral' => [
+    'inactive' => 'Inactive',
+    'active' => 'Active'
+  ],
+  'formFields' => [
+    'from' => 'De',
+    'subject' => 'Subject',
+    'message' => 'Mensaje',
+    'phone' => 'Teléfono',
+  ],
+  'notifications' => [
+    "comment" => ' Notification Type: :type -- Message: :message',
+    "title sent" => 'Sent',
+    "type" => 'Type',
+    "from" => 'from',
+    "to" => 'to',
+    "message" => 'Message'
+  ],
+  'notFound' => 'Item not found',
 
 ];

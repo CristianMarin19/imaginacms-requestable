@@ -26,12 +26,12 @@ class FormService
 
             try{
 
-                // Create Form
-                $form = $formRepository->create([
-                    "title" => trans("requestable::forms.lead.title"),
-                    "system_name" => $systemName,
-                    "active" => true
-                ]);
+        // Create Form
+        $form = $formRepository->create([
+          "title" => "CRM: $systemName - ".trans("requestable::forms.lead.title"),
+          "system_name" => $systemName,
+          "active" => true
+        ]);
 
                 $options["urlTermsAndConditions"] = null;
 
@@ -96,7 +96,25 @@ class FormService
         // Create Field
         $fieldCreated = $fieldRepository->create($dataToCreate);
 
-        return $fieldCreated;
+    if($fieldCreated->name == 'value'){
+      \DB::table('iforms__fields')->where('id', $fieldCreated->id)->update([
+        'visibility' => 'internal',
+        'system_type' => 'requestable-internal-' . $name
+      ]);
+    }
+    if ($fieldCreated->name == 'comment') {
+      \DB::table('iforms__fields')->where('id', $fieldCreated->id)->update([
+        'visibility' => 'full',
+        'system_type' => 'requestable-full-' . $name
+      ]);
+    } else {
+      \DB::table('iforms__fields')->where('id', $fieldCreated->id)->update([
+        'visibility' => 'internalHidden',
+        'system_type' => 'requestable-internalHidden-' . $name
+      ]);
+    }
+
+    return $fieldCreated;
 
     }
 

@@ -6,9 +6,10 @@ use Modules\Requestable\Jobs\ProcessNotification;
 
 class AutomationRuleService
 {
-    public function __construct()
-    {
-    }
+
+
+
+    public function __construct(){}
 
     /*
     * check rules and dispatch job

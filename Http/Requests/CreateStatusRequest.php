@@ -2,8 +2,9 @@
 
 namespace Modules\Requestable\Http\Requests;
 
-use Illuminate\Validation\Rule;
 use Modules\Core\Internationalisation\BaseFormRequest;
+use Illuminate\Validation\Rule;
+use Modules\Requestable\Rules\ValidateType;
 
 class CreateStatusRequest extends BaseFormRequest
 {
@@ -14,6 +15,7 @@ class CreateStatusRequest extends BaseFormRequest
         return [
             'category_id' => 'required',
             'value' => Rule::requiredIf($categoryService->isInternal($this->category_id)),
+            'type' => ['sometimes', new ValidateType]
         ];
     }
 
