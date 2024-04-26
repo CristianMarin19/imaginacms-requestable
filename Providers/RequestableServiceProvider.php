@@ -2,12 +2,15 @@
 
 namespace Modules\Requestable\Providers;
 
+use Illuminate\Contracts\Events\Dispatcher as DispatcherContract;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 use Modules\Core\Events\BuildingSidebar;
 use Modules\Core\Events\LoadingBackendTranslations;
 use Modules\Core\Traits\CanPublishConfiguration;
 use Modules\Requestable\Events\Handlers\RegisterRequestableSidebar;
+use Modules\Requestable\Events\Handlers\NotifyNewFilesRequestable;
+use Modules\Requestable\Events\RequestableIsUpdating;
 
 class RequestableServiceProvider extends ServiceProvider
 {
