@@ -2,6 +2,7 @@
 
 namespace Modules\Requestable\Repositories\Eloquent;
 
+use Illuminate\Support\Str;
 use Modules\Core\Icrud\Repositories\Eloquent\EloquentCrudRepository;
 use Modules\Requestable\Repositories\CategoryRepository;
 
